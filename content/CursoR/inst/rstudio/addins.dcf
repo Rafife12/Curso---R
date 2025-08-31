@@ -1,0 +1,4 @@
+Name: Atualizar material
+Description: Atualiza o material da aula, baixando diretamente do GitHub
+Binding: atualizar_material
+Interactive: true
