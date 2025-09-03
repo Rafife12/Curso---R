@@ -1,103 +1,56 @@
-library(shiny)
-library(bslib)
-
-# Define UI for slider demo app ----
-ui <- page_sidebar(
-
-  # App title ----
-  title = "Sliders",
-
-  # Sidebar panel for inputs ----
-  sidebar = sidebar(
-
-    # Input: Simple integer interval ----
-    sliderInput(
-      "integer",
-      "Integer:",
-      min = 0,
-      max = 1000,
-      value = 500
-    ),
-
-    # Input: Decimal interval with step value ----
-    sliderInput(
-      "decimal",
-      "Decimal:",
-      min = 0,
-      max = 1,
-      value = 0.5,
-      step = 0.1
-    ),
-
-    # Input: Specification of range within an interval ----
-    sliderInput(
-      "range",
-      "Range:",
-      min = 1,
-      max = 1000,
-      value = c(200, 500)
-    ),
-
-    # Input: Custom currency format for with basic animation ----
-    sliderInput(
-      "format",
-      "Custom Format:",
-      min = 0,
-      max = 10000,
-      value = 0,
-      step = 2500,
-      pre = "$",
-      sep = ",",
-      animate = TRUE
-    ),
-
-    # Input: Animation with custom interval (in ms) ----
-    # to control speed, plus looping
-    sliderInput(
-      "animation",
-      "Looping Animation:",
-      min = 1,
-      max = 2000,
-      value = 1,
-      step = 10,
-      animate =
-        animationOptions(interval = 300, loop = TRUE)
-    )
+ui <- fluidPage(
+{{
+# These blocks of code are processed with htmlTemplate()
+if (isTRUE(module)) {
+'  # ======== Modules ========
+  # exampleModuleUI is defined in R/example-module.R
+  wellPanel(
+    h2("Modules example"),
+    exampleModuleUI("examplemodule1", "Click counter #1"),
+    exampleModuleUI("examplemodule2", "Click counter #2")
   ),
-
-  # Output: Table summarizing the values entered ----
-  tableOutput("values")
+  # =========================
+'
+}
+}}
+  wellPanel(
+    h2("Sorting example"),
+    sliderInput("size", "Data size", min = 5, max = 20, value = 10),
+{{
+if (isTRUE(rdir)) {
+  '    div("Lexically sorted sequence:"),'
+} else {
+  '    div("Sorted sequence:"),'
+}
+}}
+    verbatimTextOutput("sequence")
+  )
 )
 
-# Define server logic for slider examples ----
-server <- function(input, output) {
-
-  # Reactive expression to create data frame of all input values ----
-  sliderValues <- reactive({
-    data.frame(
-      Name = c(
-        "Integer",
-        "Decimal",
-        "Range",
-        "Custom Format",
-        "Animation"
-      ),
-      Value = as.character(c(
-        input$integer,
-        input$decimal,
-        paste(input$range, collapse = " "),
-        input$format,
-        input$animation
-      )),
-      stringsAsFactors = FALSE
-    )
+server <- function(input, output, session) {
+{{
+if (isTRUE(module)) {
+'  # ======== Modules ========
+  # exampleModuleServer is defined in R/example-module.R
+  exampleModuleServer("examplemodule1")
+  exampleModuleServer("examplemodule2")
+  # =========================
+'
+}
+}}
+  data <- reactive({
+{{
+if (isTRUE(rdir)) {
+'    # lexical_sort from R/example.R
+    lexical_sort(seq_len(input$size))'
+} else {
+'    sort(seq_len(input$size))'
+}
+}}
   })
-
-  # Show the values in an HTML table ----
-  output$values <- renderTable({
-    sliderValues()
+  output$sequence <- renderText({
+    paste(data(), collapse = " ")
   })
 }
 
-# Create Shiny app ----
 shinyApp(ui, server)
